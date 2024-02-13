@@ -1,6 +1,7 @@
 const { User, Thought } = require('../models');
 
 module.exports = {
+    // gets all thoughts
     async getThoughts(req, res) {
         try {
             const thoughts = await Thought.find();
@@ -9,6 +10,7 @@ module.exports = {
             res.status(500).json(err);
         }
     },
+    // gets a single thought by its 'thoughtId'
     async getSingleThought(req, res) {
         try {
             const thought = await Thought.findOne({ _id: req.params.thoughtId });
@@ -22,27 +24,21 @@ module.exports = {
             res.status(500).json(err);
         }
     },
+    // creates a thought
     async createThought(req, res) {
         try {
             const newThought = await Thought.create(req.body);
-            // const user = await User.findOneAndUpdate(
-            //     { _id: req.body.userId },
-            //     { $addToSet: { thoughts: thought._id }},
-            //     { new: true }
-            // );
-
-            // if (!user) {
-            //     return res.status(404).json({ message: 'The thought was created, but there is no user with that ID!' });
-            // }
 
             res.status(200).json({ newThought, message: 'Thought created!' });
         } catch (err) {
             res.status(500).json(err)
         }
     },
+    // updates a thought by its 'thoughtId'
     async updateThought(req, res) {
         try {
             const updatedThought = await Thought.findByIdAndUpdate(
+                // updates values from req.body
                 { _id: req.params.thoughtId },
                 { $set: req.body },
                 { runValidators: true, new: true }
@@ -57,6 +53,7 @@ module.exports = {
             res.status(500).json(err);
         }
     },
+    // deletes a thought
     async deleteThought(req, res) {
         try {
             const deletedThought = await Thought.findOneAndRemove({ _id: req.params.thoughtId });
@@ -65,24 +62,16 @@ module.exports = {
                 return res.status(404).json({ message: 'No thought with that ID!' });
             }
 
-            // const user = await User.findOneAndUpdate(
-            //     { thoughts: req.params.thoughtId },
-            //     { $pull: { thoughts: req.params.thoughtId } },
-            //     { new: true }
-            // );
-
-            // if (!user) {
-            //     res.status(404).json({ message: 'The thought was deleted, but there are no users with that ID!' });
-            // }
-
             res.status(200).json({ deletedThought, message: 'Thought deleted!' });
         } catch (err) {
             res.status(500).json(err);
         }
     },
+    // creates a reaction to a thought
     async createReaction(req, res) {
         try {
             const reaction = await Thought.findOneAndUpdate(
+                // pushes reaction to 'reactions' array
                 { _id: req.params.thoughtId },
                 { $addToSet: { reactions: req.body } },
                 {runValidators: true, new: true }
@@ -97,9 +86,11 @@ module.exports = {
             res.status(500).json(err);
         }
     },
+    // deletes a reaction from a thought
     async deleteReaction(req, res) {
         try {
             const reaction = await Thought.findOneAndUpdate(
+                // pulls reaction from thought's 'reactions' array
                 { _id: req.params.thoughtId },
                 { $pull: { reactions: { reactionId: req.params.reactionId } } },
                 { runValidators: true, new: true }
